@@ -1,3 +1,4 @@
 # wordpress-docker-compose
 
-use `docker-compose up -d`
+- install docker [get.docker.com](https://get.docker.com/)
+- use `docker-compose up -d`
