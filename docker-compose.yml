@@ -1,45 +1,60 @@
-version: '3.3'
+version: '3.7'
 
 services:
   db:
     image: mariadb # or mysql
+    container_name: '${APP_NAME}_db'
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - new_network
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: somewordpress
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
   phpmyadmin:
     depends_on:
       - db
     image: phpmyadmin/phpmyadmin
+    container_name: '${APP_NAME}_phpmyadmin'
+    networks:
+      - new_network
     ports:
-      - '8889:80'
+      - '${PHPMYADMIN_PORT}:80'
     restart: always
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      # PMA_USER: wordpress
-      # PMA_PASSWORD: wordpress
+      # PMA_USER: ${MYSQL_USER}
+      # PMA_PASSWORD: ${MYSQL_PASSWORD}
 
   wordpress:
     depends_on:
       - db
     image: wordpress
+    container_name: '${APP_NAME}_wordpress'
     volumes:
       - wp_data:/var/www/html
+    networks:
+      - new_network
     ports:
-      - '8888:80'
+      - '${WORDPRESS_PORT}:80'
     restart: always
     environment:
       WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
 
 volumes:
-  db_data: {}
-  wp_data: {}
+  db_data:
+    name: ${APP_NAME}_wordpress_db_data
+  wp_data:
+    name: ${APP_NAME}_wordpress_wp_data
+
+networks:
+  new_network:
+    name: ${APP_NAME}_wordpress_network
